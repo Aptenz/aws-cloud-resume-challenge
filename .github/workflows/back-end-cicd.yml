@@ -3,7 +3,7 @@ name: Terraform AWS Deployment
 on:
   push:
     paths:
-      - 'infra/**' # Adjust the path based on your Terraform files location
+      - 'infra/**'
     branches:
       - main
 
