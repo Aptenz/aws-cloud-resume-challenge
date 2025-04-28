@@ -83,3 +83,11 @@ resource "aws_lambda_function_url" "url1" {
     max_age           = 86400
   }
 }
+
+resource "aws_cloudfront_invalidation" "invalidate_cache" { // for updated s3 cache
+  distribution_id = "E3BBPFT4SMA8E5"
+
+  paths = [
+    "/*" // invalidates everything
+  ]
+}

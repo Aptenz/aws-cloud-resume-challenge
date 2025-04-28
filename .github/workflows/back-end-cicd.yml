@@ -45,3 +45,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "E3BBPFT4SMA8E5" \
+            --paths "/*"  # You can adjust the path if you only need to invalidate certain files
