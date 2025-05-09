@@ -32,21 +32,27 @@ jobs:
         run: terraform validate
         
       - name: Terraform Plan
+        id: plan
         working-directory: infra/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform plan
+        run: |
+          terraform plan -detailed-exitcode -out=tfplan.out
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
         
       - name: Terraform Apply
-        if: github.event_name == 'push' && steps.terraform.outputs.changes == 'true'
+        if: steps.plan.outputs.exitcode == '2'
         working-directory: infra/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan.out
       - name: Invalidate CloudFront Cache
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "E3BBPFT4SMA8E5" \
-            --paths "/*"  # You can adjust the path if you only need to invalidate certain files
+            --paths "/*"
